@@ -167,7 +167,7 @@ function getCORSContent(principal,url) {
     //alert('Response from CORS request to ' + url + ': ' + text);
     if (isJSURL(url)) {
       alert('JS file');
-      execScript(principal,text);
+      execScript(principal,text); 
     }
 
   };
