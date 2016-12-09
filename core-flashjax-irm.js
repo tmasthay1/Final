@@ -67,7 +67,7 @@ function irm_log(s){
 function filterSource(principal, dynamic_script_code){   
    var s = dynamic_script_code;
    if( principal === "thirdParty" || principal === "dynamicOnly" ){
-	s = dynamic_script_code.replace(/.*document[ \t\n]*[.]*.*[ \t\n]*=.*/g,"");
+	s = dynamic_script_code.replace(/.*document[ \t\n]*[.].*[ \t\n]*=.*/g,"");
 	s = s.replace(/.*document[ \t)].*/g,"");
    }
    return s;
@@ -111,7 +111,7 @@ var eval_policy = function(args, proceed, object){
    var principal = thisPrincipal();
    if( principal === "thirdParty" ){
       //purge all substrings such as document.location="http://google.com";
-      args[0] = args[0].replace(/.*document[ \t\n]*[.]*.*[ \t\n]*=.*/g, "");
+      args[0] = args[0].replace(/.*document[ \t\n]*[.].*[ \t\n]*=.*/g, "");
       //purge all substrings such as f(document, 1), so that document can't be passed to functions
       args[0] = args[0].replace(/.*document[ \t)].*/g,"");
    }
