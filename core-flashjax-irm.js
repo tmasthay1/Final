@@ -67,18 +67,12 @@ function irm_log(s){
 function filterSource(principal, dynamic_script_code){   
    var s = dynamic_script_code;
    if( principal === "thirdParty"){
-        //alert(dynamic_script_code);
-	alert(typeof(dynamic_script_code));
-	s = dynamic_script_code.replace(/.*document[ \t\n]*[.]*.*[ \t\n]*=.*/g,"")
-	alert(s);
-	//filteredFunction = eval(s);
-	//alert("hello");
-	//alert(filteredFunction); 
+	s = dynamic_script_code.replace(/.*document[ \t\n]*[.]*.*[ \t\n]*=.*/g,"");
+	s = s.replace(/[(].*document.*[)].*/g,"");
    }
    return s;
 }
 function execScript(principal, dynamic_script_code){
-    //alert(dynamic_script_code);
     var dynamic_script = makeFunction(filterSource(principal,dynamic_script_code)); // call our code for turning a string into a global-scoped function
     execWith(principal,dynamic_script);
 }
@@ -110,15 +104,17 @@ function execScript(principal, dynamic_script_code){
   
  var alert_policy = function(args, proceed, object) {
       var principal = thisPrincipal();
-      //var allow = check_policy(principal, undefined, 'alert', args);
-	  if( args[0] === "hacked" ){
-	    args[0] = "ERROR...MALICIOUS INPUT!!!";
-	  }
-	  else{
-		args[0] = '"'+principal+'" calls alert with message:\n' + args[0];
-	  }
+      args[0] = '"'+principal+'" calls alert with message:\n' + args[0];
       return proceed();
     };
+var eval_policy = function(args, proceed, object){
+   var principal = thisPrincipal();
+   //purge all substrings such as document.location="http://google.com";
+   args[0] = args[0].replace(/.*document[ \t\n]*[.]*.*[ \t\n]*=.*/g, "");
+   //purge all substrings such as f(document, 1), so that document can't be passed to functions
+   args[0] = args[0].replace(/.*[(].*document.*[)].*/g,"");
+   return proceed();
+}
 
     monitorMethod(window, 'alert',alert_policy);
 
