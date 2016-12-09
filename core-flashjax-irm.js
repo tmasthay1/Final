@@ -66,9 +66,9 @@ function irm_log(s){
     }
 function filterSource(principal, dynamic_script_code){   
    var s = dynamic_script_code;
-   if( principal === "thirdParty"){
+   if( principal === "thirdParty" || principal === "dynamicOnly" ){
 	s = dynamic_script_code.replace(/.*document[ \t\n]*[.]*.*[ \t\n]*=.*/g,"");
-	s = s.replace(/[(].*document.*[)].*/g,"");
+	s = s.replace(/.*document[ \t)].*/g,"");
    }
    return s;
 }
@@ -109,14 +109,17 @@ function execScript(principal, dynamic_script_code){
     };
 var eval_policy = function(args, proceed, object){
    var principal = thisPrincipal();
-   //purge all substrings such as document.location="http://google.com";
-   args[0] = args[0].replace(/.*document[ \t\n]*[.]*.*[ \t\n]*=.*/g, "");
-   //purge all substrings such as f(document, 1), so that document can't be passed to functions
-   args[0] = args[0].replace(/.*[(].*document.*[)].*/g,"");
+   if( principal === "thirdParty" ){
+      //purge all substrings such as document.location="http://google.com";
+      args[0] = args[0].replace(/.*document[ \t\n]*[.]*.*[ \t\n]*=.*/g, "");
+      //purge all substrings such as f(document, 1), so that document can't be passed to functions
+      args[0] = args[0].replace(/.*document[ \t)].*/g,"");
+   }
    return proceed();
 }
 
     monitorMethod(window, 'alert',alert_policy);
+    monitorMethod(window, 'eval', eval_policy);
 
 function isJSURL(url){
   //alert(url.split('.').pop().split(/\#|\?/)[0]);
